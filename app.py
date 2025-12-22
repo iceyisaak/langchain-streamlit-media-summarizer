@@ -2,7 +2,6 @@ import validators
 import streamlit as st
 from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
-# Note: Ensure you are using the correct import for load_summarize_chain
 from langchain_classic.chains.summarize import load_summarize_chain
 from langchain_community.document_loaders import YoutubeLoader, UnstructuredURLLoader
 
@@ -38,7 +37,7 @@ if st.button("Summarize the Content from URL"):
     else:
         try:
             with st.spinner("Processing..."):
-                # 1. Initialize LLM ONLY inside the success logic
+                # 1. Initialize LLM
                 llm = ChatGroq(model="llama-3.1-8b-instant", groq_api_key=groq_api_key)
 
                 # 2. Loading the URL data
@@ -48,7 +47,7 @@ if st.button("Summarize the Content from URL"):
                     loader = UnstructuredURLLoader(
                         urls=[generic_url],
                         ssl_verify=False,
-                        headers={ # Fixed typo from 'heaers' to 'headers'
+                        headers={ 
                              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
                         })
                 
@@ -57,7 +56,7 @@ if st.button("Summarize the Content from URL"):
                 # 3. Summarization chain
                 summarization_chain = load_summarize_chain(llm, chain_type="stuff", prompt=prompt)
                 
-                # Using invoke instead of run (run is deprecated in newer LangChain versions)
+                # Invoke chain
                 output_summary = summarization_chain.invoke(doc)
 
                 st.success(output_summary['output_text'])
