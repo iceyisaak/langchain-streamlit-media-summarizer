@@ -7,6 +7,5 @@ validators==0.28.1
 youtube_transcript_api
 streamlit
 unstructured
-pytube
 git+https://github.com/pytube/pytube
 yt_dlp

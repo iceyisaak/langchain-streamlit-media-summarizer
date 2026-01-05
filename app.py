@@ -42,7 +42,12 @@ if st.button("Summarize the Content from URL"):
 
                 # 2. Loading the URL data
                 if "youtube.com" in generic_url or "youtu.be" in generic_url:
-                    loader = YoutubeLoader.from_youtube_url(generic_url, add_video_info=True)
+                    # loader = YoutubeLoader.from_youtube_url(generic_url, add_video_info=True)
+                    loader = YoutubeLoader.from_youtube_url(
+                        generic_url, 
+                        add_video_info=True, 
+                        video_transformer_class=None  # Default transformer
+                    )
                 else:
                     loader = UnstructuredURLLoader(
                         urls=[generic_url],
