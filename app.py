@@ -46,7 +46,7 @@ if st.button("Summarize the Content from URL"):
                     loader = YoutubeLoader.from_youtube_url(
                         generic_url, 
                         add_video_info=True, 
-                        video_transformer_class=None  # Default transformer
+                        # video_transformer_class=None  # Default transformer
                     )
                 else:
                     loader = UnstructuredURLLoader(
