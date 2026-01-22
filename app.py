@@ -39,13 +39,9 @@ if st.button("Summarize the Content from URL"):
             with st.spinner("Processing..."):
                 # 1. Initialize LLM
                 llm = ChatGroq(model="llama-3.1-8b-instant", groq_api_key=groq_api_key)
-                # file_path, title = download_video(generic_url)
-                # st.success(f"Finished: {title}")
-
 
                 # 2. Loading the URL data
                 if "youtube.com" in generic_url or "youtu.be" in generic_url:
-                    # loader = YoutubeLoader.from_youtube_url(generic_url, add_video_info=True)
                     loader = YoutubeLoader.from_youtube_url(
                         generic_url, 
                         add_video_info=False, 
