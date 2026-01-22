@@ -4,6 +4,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_classic.chains.summarize import load_summarize_chain
 from langchain_community.document_loaders import YoutubeLoader, UnstructuredURLLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 st.set_page_config(page_title="Langchain: Summarize Text from Webpage")
 st.title("Langchain-Streamlit: Media Summarizer")
@@ -13,16 +14,27 @@ st.subheader("Summarize URL")
 with st.sidebar:
     groq_api_key = st.text_input("Groq API Key", value="", type="password")
 
+
+###############################################
+
 # Get URL Input
 generic_url = st.text_input("URL", label_visibility="collapsed")
 
-# Prompt Template
-prompt_template = """
-    Provide a summary of the following content in 500 words:
-    Content: {text}
+# 1. Map Prompt: Summarize individual chunks
+map_prompt_template = """
+    Write a concise summary of the following text:
+    "{text}"
+    CONCISE SUMMARY:
 """
+map_prompt = PromptTemplate(template=map_prompt_template, input_variables=["text"])
 
-prompt = PromptTemplate(template=prompt_template, input_variables=["text"])
+# 2. Combine Prompt: Merge those summaries into a final 500-word piece
+combine_prompt_template = """
+    Write a summary of the following content in approximately 500 words:
+    "{text}"
+    FINAL SUMMARY:
+"""
+combine_prompt = PromptTemplate(template=combine_prompt_template, input_variables=["text"])
 
 
 
@@ -54,13 +66,28 @@ if st.button("Summarize the Content from URL"):
                              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
                         })
                 
-                doc = loader.load()
+                docs = loader.load()
+
+               # We use len (character count) as the length_function to avoid the 'transformers' requirement
+                text_splitter = RecursiveCharacterTextSplitter(
+                    chunk_size=3500, 
+                    chunk_overlap=300,
+                    length_function=len 
+                )
+                split_docs = text_splitter.split_documents(docs)
 
                 # 3. Summarization chain
-                summarization_chain = load_summarize_chain(llm, chain_type="stuff", prompt=prompt)
+               # Using map_reduce to handle the large input across multiple API calls
+                summarization_chain = load_summarize_chain(
+                    llm=llm,
+                    chain_type="map_reduce",
+                    map_prompt=map_prompt,
+                    combine_prompt=combine_prompt,
+                    verbose=True
+                )
                 
                 # Invoke chain
-                output_summary = summarization_chain.invoke(doc)
+                output_summary = summarization_chain.invoke(split_docs)
 
                 st.success(output_summary['output_text'])
 

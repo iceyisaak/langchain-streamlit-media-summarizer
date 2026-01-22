@@ -5,7 +5,8 @@ langchain_community
 langchain_groq
 validators==0.28.1
 youtube_transcript_api
+langchain-text-splitters
+transformers
 streamlit
 unstructured
-git+https://github.com/pytube/pytube
 yt_dlp
