@@ -5,6 +5,7 @@ from langchain_groq import ChatGroq
 from langchain_classic.chains.summarize import load_summarize_chain
 from langchain_community.document_loaders import YoutubeLoader, UnstructuredURLLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
 
 st.set_page_config(page_title="Langchain: Summarize Text from Webpage")
 st.title("Langchain-Streamlit: Media Summarizer")
@@ -12,7 +13,7 @@ st.subheader("Summarize URL")
 
 # Get Groq API Key and URL
 with st.sidebar:
-    groq_api_key = st.text_input("Groq API Key", value="", type="password")
+    api_key = st.text_input("HuggingFace Access Token", value="", type="password")
 
 
 ###############################################
@@ -42,7 +43,7 @@ combine_prompt = PromptTemplate(template=combine_prompt_template, input_variable
 
 if st.button("Summarize the Content from URL"):
 
-    if not groq_api_key.strip() or not generic_url.strip():
+    if not api_key.strip() or not generic_url.strip():
         st.error("Please provide both the GROQ API Key and the URL to get started.")
     elif not validators.url(generic_url):
         st.error("Please enter a valid URL (e.g. Youtube URL or Website URL)")
@@ -50,7 +51,17 @@ if st.button("Summarize the Content from URL"):
         try:
             with st.spinner("Processing..."):
                 # 1. Initialize LLM
-                llm = ChatGroq(model="llama-3.1-8b-instant", groq_api_key=groq_api_key)
+                # llm = ChatGroq(model="llama-3.1-8b-instant", groq_api_key=groq_api_key)
+                llm_base=HuggingFaceEndpoint(
+                    repo_id="HuggingFaceH4/zephyr-7b-beta",
+                    max_new_tokens=512,
+                    temperature=0.7,
+                    huggingfacehub_api_token=api_key,
+                    task="conversational",
+                    # provider="auto"
+                )
+
+                llm = ChatHuggingFace(llm=llm_base)
 
                 # 2. Loading the URL data
                 if "youtube.com" in generic_url or "youtu.be" in generic_url:
